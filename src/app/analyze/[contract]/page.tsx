@@ -1,0 +1,1 @@
+import{AnalysisClient}from"@/components/AnalysisClient";export default async function Page({params}:{params:Promise<{contract:string}>}){const{contract}=await params;return <main><AnalysisClient contract={contract}/></main>}
