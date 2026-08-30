@@ -1,32 +1,47 @@
 import Link from "next/link";
 
+function BrandMark() {
+  return (
+    <span className="brand-mark" aria-hidden="true">
+      <span className="brand-mark-dot" />
+      <span className="brand-mark-ring"><i /></span>
+      <span className="brand-mark-handle" />
+    </span>
+  );
+}
+
 export function Nav() {
   return (
-    <div className="shell">
-      <nav className="nav" aria-label="Primary navigation">
-        <Link href="/" className="brand link" aria-label="BaseLens home">
-          <span className="base-dot" aria-hidden="true" />
-          BaseLens
-        </Link>
-        <div className="navlinks">
-          <Link href="/compare">Compare</Link>
-          <Link href="/how-it-works">How it works</Link>
-          <Link href="/methodology">Methodology</Link>
-        </div>
-        <Link href="/compare" className="btn ghost link">
-          Compare tokens
-        </Link>
-      </nav>
-    </div>
+    <header className="site-header">
+      <div className="shell">
+        <nav className="nav" aria-label="Primary navigation">
+          <Link href="/" className="brand link" aria-label="BaseLens home">
+            <BrandMark />
+            <span>BaseLens</span>
+          </Link>
+          <div className="navlinks">
+            <Link href="/compare">Compare</Link>
+            <Link href="/how-it-works">How it works</Link>
+            <Link href="/methodology">Methodology</Link>
+          </div>
+          <a href="/#analyze" className="nav-action link">
+            Analyze token
+          </a>
+        </nav>
+      </div>
+    </header>
   );
 }
 
 export function Footer() {
   return (
     <footer className="footer">
-      <div className="shell">
-        BaseLens is a research tool, not financial advice. Data can be incomplete
-        or delayed, so verify critical information before making a decision.
+      <div className="shell footer-inner">
+        <div className="footer-brand"><BrandMark /><b>BaseLens</b></div>
+        <p>
+          Research tool, not financial advice. Data can be incomplete or delayed.
+          Verify critical information before making a decision.
+        </p>
       </div>
     </footer>
   );
