@@ -11,18 +11,19 @@ export function AnalyzeForm() {
   function analyze() {
     const contract = value.trim();
     if (!/^0x[a-fA-F0-9]{40}$/.test(contract)) {
-      setError("Enter a valid 0x Base token contract address.");
+      setError("That does not look like a Base token contract.");
       return;
     }
     router.push(`/analyze/${contract}`);
   }
 
   return (
-    <div>
+    <div className="contract-form">
       <label className="input-label" htmlFor="token-contract">
-        Token contract
+        Contract address
       </label>
       <div className="searchbar">
+        <span className="input-prefix" aria-hidden="true">⌕</span>
         <input
           id="token-contract"
           className="input"
@@ -37,18 +38,15 @@ export function AnalyzeForm() {
           autoComplete="off"
           aria-describedby={error ? "contract-error" : "contract-help"}
         />
-        <button className="btn blue" onClick={analyze}>
-          Run analysis
+        <button className="btn blue analyze-button" onClick={analyze}>
+          Analyze
+          <span aria-hidden="true">→</span>
         </button>
       </div>
       {error ? (
-        <div id="contract-error" className="error" role="alert">
-          {error}
-        </div>
+        <div id="contract-error" className="error" role="alert">{error}</div>
       ) : (
-        <p id="contract-help" className="form-help">
-          Base mainnet only. No wallet connection required.
-        </p>
+        <p id="contract-help" className="form-help">Base mainnet ERC-20 contract</p>
       )}
     </div>
   );
