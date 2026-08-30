@@ -2,12 +2,12 @@ import Link from "next/link";
 import { AnalyzeForm } from "@/components/AnalyzeForm";
 
 const checks = [
-  ["Market", "Price, market cap, FDV and token age"],
-  ["Liquidity", "Pool depth and liquidity-to-market-cap ratio"],
-  ["Trading", "Volume, buys, sells and short-term changes"],
-  ["Holders", "Holder count and top-wallet concentration"],
-  ["Contract", "Verification, minting, ownership and restrictions"],
-  ["Social", "Official website and discovered social profiles"],
+  ["MARKET", "Price · Market cap · FDV · Pair age"],
+  ["LIQUIDITY", "Pool depth · Liquidity / market cap"],
+  ["FLOW", "Volume · Buys · Sells · Momentum"],
+  ["HOLDERS", "Holder count · Top-wallet concentration"],
+  ["SECURITY", "Honeypot · Mint · Blacklist · Restrictions"],
+  ["IDENTITY", "Website · X · Telegram · Official links"],
 ];
 
 export default function Home() {
@@ -15,56 +15,49 @@ export default function Home() {
     <main>
       <section className="hero">
         <div className="shell">
-          <div className="eyebrow">Base mainnet · Token intelligence agent</div>
-          <h1>Know what you’re buying on Base.</h1>
+          <div className="eyebrow">BASE / MAINNET / TOKEN RESEARCH</div>
+          <h1>Investigate a token before the trade.</h1>
           <p>
-            Paste a Base token contract. BaseLens checks the market, liquidity,
-            trading activity, holders, contract risk and official social links,
-            then explains what actually stands out.
+            Drop in a Base contract address. BaseLens pulls together market structure,
+            liquidity, trading flow, holder concentration and contract risk, then an
+            AI agent explains the signals without inventing the numbers.
           </p>
           <AnalyzeForm />
           <div className="hero-actions">
-            <Link href="/compare" className="btn ghost link">
-              Compare tokens
-            </Link>
-            <span className="small">No wallet connection required.</span>
-          </div>
-        </div>
-      </section>
-
-      <section className="section">
-        <div className="shell">
-          <div className="eyebrow">How the agent works</div>
-          <h2 className="section-title">Evidence first. AI second.</h2>
-          <p className="section-copy">
-            The model does not invent token stats. BaseLens gathers live evidence,
-            calculates transparent scores, then asks the agent to interpret only
-            what was actually found.
-          </p>
-          <div className="grid3">
-            <div className="feature">
-              <span className="num">01 · OBSERVE</span>
-              <h3>Investigate the contract</h3>
-              <p>Confirm it on Base and collect available DEX, holder, contract and security data.</p>
-            </div>
-            <div className="feature">
-              <span className="num">02 · ANALYZE</span>
-              <h3>Score the signals</h3>
-              <p>Measure liquidity, activity, concentration, safety, social presence and momentum with deterministic logic.</p>
-            </div>
-            <div className="feature">
-              <span className="num">03 · EXPLAIN</span>
-              <h3>Show what matters</h3>
-              <p>Turn the evidence into a readable verdict, strongest signal, biggest risk and clear next checks.</p>
-            </div>
+            <Link href="/compare" className="btn ghost link">Compare 2–5 tokens</Link>
+            <span className="small">Base mainnet only · No wallet required</span>
           </div>
         </div>
       </section>
 
       <section className="section panel-bg">
         <div className="shell">
-          <div className="eyebrow">Research coverage</div>
-          <h2 className="section-title">One contract. Multiple lenses.</h2>
+          <div className="eyebrow">RESEARCH PIPELINE</div>
+          <h2 className="section-title">The agent reads evidence, not vibes.</h2>
+          <div className="grid3">
+            <div className="feature">
+              <span className="num">01 / OBSERVE</span>
+              <h3>Collect live signals</h3>
+              <p>Validate the Base contract and query available market, liquidity, holder and security sources.</p>
+            </div>
+            <div className="feature">
+              <span className="num">02 / SCORE</span>
+              <h3>Run deterministic checks</h3>
+              <p>Score seven measurable areas before any AI interpretation happens.</p>
+            </div>
+            <div className="feature">
+              <span className="num">03 / INTERPRET</span>
+              <h3>Explain the profile</h3>
+              <p>The agent receives normalized evidence and returns strengths, risks, confidence and what to investigate next.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="section">
+        <div className="shell">
+          <div className="eyebrow">SIGNAL COVERAGE</div>
+          <h2 className="section-title">Six views of the same contract.</h2>
           <div className="intelgrid">
             {checks.map(([title, description]) => (
               <div className="intel" key={title}>
