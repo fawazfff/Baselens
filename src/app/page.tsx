@@ -1,170 +1,74 @@
 import Link from "next/link";
 import { AnalyzeForm } from "@/components/AnalyzeForm";
 
-const researchRows = [
-  ["Market", "Price, market cap, FDV, pair age"],
-  ["Liquidity", "Pool depth and valuation ratio"],
-  ["Activity", "Volume, buys, sells, movement"],
-  ["Holders", "Count and concentration"],
-  ["Security", "Restrictions, taxes, minting, honeypot flags"],
-  ["Identity", "Website and official social links"],
-];
-
 export default function Home() {
   return (
     <main id="main-content">
-      <section className="home-hero">
-        <div className="home-grid" aria-hidden="true" />
-        <div className="shell home-hero-inner">
-          <p className="hero-meta">Base mainnet · token research agent</p>
-          <h1>
-            Look before
-            <br />
-            you <span>ape.</span>
-          </h1>
-          <p className="hero-copy">
-            Paste a Base token contract. BaseLens checks the market, liquidity,
-            holders and contract risk before the agent tells you what actually
-            stands out.
-          </p>
-          <div className="hero-form-wrap">
-            <AnalyzeForm />
-          </div>
-          <div className="hero-utility">
-            <span>Chain 8453</span>
-            <span>No wallet required</span>
-            <Link href="/compare">Compare tokens →</Link>
-          </div>
+      <section className="reference-hero" id="analyze">
+        <div className="reference-grid" aria-hidden="true">
+          <i className="float-square s1" /><i className="float-square s2" /><i className="float-square s3" /><i className="float-square s4" />
+        </div>
+        <div className="shell reference-hero-inner">
+          <div className="reference-pill"><span>＋</span> AI-POWERED TOKEN INTELLIGENCE ON BASE</div>
+          <h1>Check the contract,<br />not the <span>timeline.</span></h1>
+          <p>BaseLens is your AI research agent for Base tokens.<br />Real data. Clear signals. Smarter decisions.</p>
+          <div className="reference-search"><AnalyzeForm /></div>
         </div>
       </section>
 
-      <section className="product-window-section">
+      <section className="dashboard-showcase">
         <div className="shell">
-          <div className="product-window">
-            <div className="product-window-bar">
-              <div className="window-left">
-                <span className="window-mark" />
-                <b>BaseLens</b>
-                <span>Example analysis</span>
-              </div>
-              <div className="window-status"><i /> Base mainnet</div>
-            </div>
+          <div className="showcase-window">
+            <aside className="showcase-sidebar">
+              <div className="side-brand"><span className="mini-lens">b</span><b>BaseLens</b></div>
+              <nav>
+                <span className="active">▦ <b>Dashboard</b></span>
+                <span>⌕ Analyze</span>
+                <span>⌘ Compare</span>
+                <span>☆ Watchlist</span>
+                <span>♧ Alerts</span>
+                <span>⌘ API</span>
+                <span>◷ History</span>
+                <span>▧ Docs</span>
+              </nav>
+              <div className="base-side-card"><b>Built on Base</b><p>Secure. Fast. Low fees.</p><a>Learn more →</a></div>
+              <div className="wallet-chip">◉ 0xFawaz...69f7⌄</div>
+            </aside>
 
-            <div className="product-preview">
-              <aside className="preview-rail">
-                <span className="rail-label">Research trace</span>
-                <div className="rail-step active"><i /> Observe</div>
-                <div className="rail-step"><i /> Score</div>
-                <div className="rail-step"><i /> Interpret</div>
-                <div className="rail-line" />
-                <p>Only collected evidence reaches the agent.</p>
-              </aside>
-
-              <div className="preview-body">
-                <header className="token-head">
-                  <div>
-                    <span className="preview-kicker">Token overview</span>
-                    <h2>Example Base Token</h2>
-                    <code>0x4200...0006</code>
-                  </div>
-                  <div className="agent-score">
-                    <span>Agent score</span>
-                    <strong>82</strong>
-                    <small>/100</small>
-                  </div>
-                </header>
-
-                <div className="metric-strip">
-                  <div><span>Price</span><b>$0.085</b></div>
-                  <div><span>Market cap</span><b>$18.4M</b></div>
-                  <div><span>Liquidity</span><b>$2.6M</b></div>
-                  <div><span>24h volume</span><b>$5.1M</b></div>
+            <div className="showcase-main">
+              <div className="showcase-tabs"><span>‹ Dashboard</span><b>✦ AI Agent Analysis</b><span>⌘ On-chain Data</span><span>♢ Security Scanning</span><span>♧ Social Signals</span><span>◉ Liquidity</span></div>
+              <div className="showcase-content">
+                <div className="showcase-title"><h2>Token Overview</h2><button>☆ Add to Watchlist</button></div>
+                <div className="token-summary">
+                  <div className="token-identity"><div className="token-avatar">B</div><div><h3>BRETT <small>●</small></h3><p>Brett (Base)</p><code>0x532f...aee8</code></div></div>
+                  <div className="score-card"><span>✦ Agent Score</span><div><strong>86</strong><small>/100</small></div><em>Strong</em><i className="score-arc" /></div>
+                  <div className="verdict-card"><span>✦ AI Verdict</span><p>Strong community traction and healthy liquidity. No critical red flags detected. Proceed with caution.</p><a>View full analysis →</a></div>
                 </div>
 
-                <div className="preview-analysis">
-                  <div className="agent-summary">
-                    <span className="preview-kicker">Agent read</span>
-                    <h3>Healthy market profile. Holder concentration deserves another look.</h3>
-                    <p>
-                      Liquidity is strong relative to valuation and trading remains active.
-                      No obvious sell restriction appears in the available contract evidence.
-                    </p>
-                    <div className="summary-points">
-                      <div><span>Strongest signal</span><b>Liquidity depth</b></div>
-                      <div><span>Biggest risk</span><b>Holder concentration</b></div>
-                    </div>
-                  </div>
+                <div className="showcase-metrics">
+                  <div><span>Market Cap</span><b>$498.12M</b><em>▲ 12.45%</em></div>
+                  <div><span>Price</span><b>$0.08521</b><em>▲ 8.32%</em></div>
+                  <div><span>Liquidity</span><b>$23.47M</b><em>▲ 6.21%</em></div>
+                  <div><span>Holders</span><b>42,381</b><em>▲ 9.11%</em></div>
+                  <div><span>24h Volume</span><b>$45.12M</b><em>▲ 15.23%</em></div>
+                </div>
 
-                  <div className="signal-readout">
-                    <div className="signal-line"><span>Market health</span><b>82</b></div>
-                    <div className="signal-line"><span>Liquidity health</span><b>76</b></div>
-                    <div className="signal-line"><span>Trading activity</span><b>88</b></div>
-                    <div className="signal-line"><span>Holder health</span><b>64</b></div>
-                    <div className="signal-line"><span>Contract safety</span><b>91</b></div>
-                    <div className="confidence-line"><span>Confidence</span><b>High</b></div>
-                  </div>
+                <div className="showcase-bottom">
+                  <article><h4>Security Scan</h4><p className="green">No critical issues</p><ul><li>● Contract verified</li><li>● No mint function</li><li>● No blacklist function</li><li>● Ownership renounced</li></ul><a>View full report →</a></article>
+                  <article><h4>Liquidity Health</h4><div className="liquidity-wrap"><div className="liquidity-ring"><b>92%</b><span>Healthy</span></div><div><p>Locked</p><b>$21.41M</b><small>91.2%</small><p>Unlocked</p><b>$2.06M</b><small>8.8%</small></div></div><a>View liquidity →</a></article>
+                  <article><h4>Top Signals</h4><ul className="signals-list"><li>◆ Strong holder growth <em>▲ 18.7%</em></li><li>◆ High social activity <em>▲ 24.3%</em></li><li>◆ DEX liquidity increasing <em>▲ 9.8%</em></li><li>◆ No major sell pressure <small>Neutral</small></li></ul><a>View all signals →</a></article>
                 </div>
               </div>
             </div>
+            <div className="phone-preview" aria-hidden="true"><div className="phone-notch" /><div className="phone-content"><span>‹ Back</span><h4>🔵 BRETT</h4><small>Brett (Base)</small><div className="phone-score"><span>✦ Agent Score</span><b>86<small>/100</small></b><em>Strong</em></div><div className="phone-metrics"><b>Key Metrics</b><p>Market Cap <span>$498.12M</span></p><p>Price <span>$0.08521</span></p><p>Liquidity <span>$23.47M</span></p><p>Holders <span>42,381</span></p><p>24h Volume <span>$45.12M</span></p></div><button>View Full Analysis</button></div></div>
           </div>
         </div>
       </section>
 
-      <section className="editorial-section">
-        <div className="shell editorial-grid">
-          <div className="editorial-copy">
-            <p className="section-label">Why BaseLens</p>
-            <h2>The agent does not get to invent the numbers.</h2>
-            <p>
-              BaseLens separates collection, scoring and interpretation. Market and
-              security data come from external evidence. Deterministic checks run
-              next. The model only explains the result after that.
-            </p>
-            <Link href="/how-it-works" className="inline-link">How the agent works →</Link>
-          </div>
-
-          <div className="process-list">
-            <div className="process-row">
-              <span>01</span>
-              <div><b>Observe</b><p>Validate the contract and gather whatever evidence is actually available.</p></div>
-            </div>
-            <div className="process-row">
-              <span>02</span>
-              <div><b>Analyze</b><p>Normalize the data and score measurable signals without using an LLM.</p></div>
-            </div>
-            <div className="process-row">
-              <span>03</span>
-              <div><b>Explain</b><p>Give the agent the compact evidence set and ask it to explain the trade-offs.</p></div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="research-section">
-        <div className="shell research-layout">
-          <div className="research-heading">
-            <p className="section-label">Research coverage</p>
-            <h2>Six checks. One contract.</h2>
-          </div>
-          <div className="research-table">
-            {researchRows.map(([title, description], index) => (
-              <div className="research-row" key={title}>
-                <span>0{index + 1}</span>
-                <b>{title}</b>
-                <p>{description}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="compare-band">
-        <div className="shell compare-band-inner">
-          <div>
-            <p>Compare mode</p>
-            <h2>Put two Base tokens under the same lens.</h2>
-          </div>
-          <Link href="/compare" className="compare-link">Open compare →</Link>
+      <section className="reference-how">
+        <div className="shell reference-how-grid">
+          <div><div className="reference-pill small"><span>＋</span> AI RESEARCH AGENT</div><h2>How BaseLens works</h2></div>
+          <p>Our AI agent analyzes market and on-chain evidence to deliver clear, actionable insights without inventing token data.</p>
         </div>
       </section>
     </main>
