@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { analyzeTokenData } from "@/lib/analyzer";
 import { runComparisonAgent, runTokenAgent } from "@/lib/agent";
+import type { TokenAnalysis } from "@/lib/types";
 
 export const runtime = "nodejs";
 
@@ -24,7 +25,7 @@ export async function POST(req: NextRequest) {
 
     const settled = await Promise.allSettled(contracts.map(analyzeTokenData));
     const errors: Array<{ contract: string; error: string }> = [];
-    const items = [];
+    const items: TokenAnalysis[] = [];
 
     settled.forEach((result, index) => {
       if (result.status === "fulfilled") {
