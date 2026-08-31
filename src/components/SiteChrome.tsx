@@ -2,18 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { ArrowUpIcon, MoonIcon, SunIcon } from "./Icons";
-
-export function ThemeToggle() {
-  const [dark, setDark] = useState(false);
-  useEffect(() => {
-    const saved = localStorage.getItem("baselens-theme");
-    const next = saved ? saved === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches;
-    setDark(next); document.documentElement.dataset.theme = next ? "dark" : "light";
-  }, []);
-  function toggle() { const next = !dark; setDark(next); document.documentElement.dataset.theme = next ? "dark" : "light"; localStorage.setItem("baselens-theme", next ? "dark" : "light"); }
-  return <button className="theme-toggle" onClick={toggle} aria-label={`Switch to ${dark ? "light" : "dark"} mode`} title={`Switch to ${dark ? "light" : "dark"} mode`}>{dark ? <SunIcon/> : <MoonIcon/>}</button>;
-}
+import { ArrowUpIcon } from "./Icons";
 
 export function MobileMenu() {
   const [open, setOpen] = useState(false);
