@@ -1,4 +1,5 @@
 import { AnalyzeStartClient } from "@/components/AnalyzeStartClient";
+import { TrendingBase } from "@/components/TrendingBase";
 
 export default function AnalyzeStartPage() {
   return (
@@ -6,6 +7,7 @@ export default function AnalyzeStartPage() {
       <div className="shell research-start-shell">
         <div className="research-start-kicker">BaseLens Agent</div>
         <AnalyzeStartClient />
+        <TrendingBase />
         <p className="research-disclaimer">BaseLens grades the available evidence. It does not predict returns or tell you what to buy.</p>
       </div>
     </main>
