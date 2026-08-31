@@ -1,37 +1,9 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 type Token = { address:string; name:string; symbol:string; image:string|null; priceUsd:number|null; change24h:number|null; volume24h:number|null; liquidity:number|null; marketCap:number|null; trades24h:number; pairUrl:string|null };
-
-function money(value:number|null, compact=true) {
-  if (value == null) return "—";
-  if (compact && Math.abs(value) >= 1000) return new Intl.NumberFormat("en-US", { notation:"compact", maximumFractionDigits:1, style:"currency", currency:"USD" }).format(value);
-  if (value < .01) return `$${value.toPrecision(3)}`;
-  return new Intl.NumberFormat("en-US", { style:"currency", currency:"USD", maximumFractionDigits:value < 1 ? 4 : 2 }).format(value);
-}
-
-export function TrendingBase() {
-  const router = useRouter();
-  const [tokens,setTokens] = useState<Token[]>([]);
-  const [loading,setLoading] = useState(true);
-  const [failed,setFailed] = useState(false);
-  useEffect(()=>{fetch("/api/trending").then(async r=>{if(!r.ok) throw new Error(); const data=await r.json(); setTokens(data.tokens ?? []);}).catch(()=>setFailed(true)).finally(()=>setLoading(false));},[]);
-  if (failed) return null;
-  return <section className="trending-base" aria-labelledby="trending-title">
-    <div className="trending-head"><div><span>Discover</span><h2 id="trending-title">Trending on Base</h2><p>Tokens with notable DEX activity right now. Trending does not mean recommended.</p></div><span className="trending-source">DexScreener · ~2 min refresh</span></div>
-    {loading ? <div className="trending-skeleton" aria-label="Loading trending Base tokens">{Array.from({length:5}).map((_,i)=><i key={i}/>)}</div> : <div className="trending-list">
-      <div className="trending-labels" aria-hidden="true"><span>Token</span><span>Price</span><span>24h</span><span>Volume</span><span>Liquidity</span><span/></div>
-      {tokens.map((token,index)=><button className="trending-row" key={token.address} onClick={()=>router.push(`/analyze/${token.address}`)} aria-label={`Analyze ${token.name}`}>
-        <span className="trend-token"><b className="trend-rank">{index+1}</b>{token.image ? <img src={token.image} alt=""/> : <i>{token.symbol.slice(0,1)}</i>}<span><strong>{token.symbol}</strong><small>{token.name}</small></span></span>
-        <span className="trend-number">{money(token.priceUsd,false)}</span>
-        <span className={`trend-number ${token.change24h != null && token.change24h >= 0 ? "positive" : "negative"}`}>{token.change24h == null ? "—" : `${token.change24h > 0 ? "+" : ""}${token.change24h.toFixed(1)}%`}</span>
-        <span className="trend-number">{money(token.volume24h)}</span>
-        <span className="trend-number">{money(token.liquidity)}</span>
-        <span className="trend-analyze">Analyze <b>→</b></span>
-      </button>)}
-    </div>}
-    <p className="trending-note">Ranked from recently discovered Base tokens using volume, liquidity and transaction activity. Always inspect the evidence before making a decision.</p>
-  </section>;
-}
+function money(value:number|null,compact=true){if(value==null)return"—";if(compact&&Math.abs(value)>=1000)return new Intl.NumberFormat("en-US",{notation:"compact",maximumFractionDigits:1,style:"currency",currency:"USD"}).format(value);if(value<.01)return`$${value.toPrecision(3)}`;return new Intl.NumberFormat("en-US",{style:"currency",currency:"USD",maximumFractionDigits:value<1?4:2}).format(value)}
+export function TrendingBase(){const router=useRouter();const[tokens,setTokens]=useState<Token[]>([]);const[loading,setLoading]=useState(true);const[failed,setFailed]=useState(false);useEffect(()=>{fetch("/api/trending").then(async r=>{if(!r.ok)throw new Error();const data=await r.json();setTokens(data.tokens??[])}).catch(()=>setFailed(true)).finally(()=>setLoading(false))},[]);if(failed)return null;return <section className="trending-base" aria-labelledby="trending-title"><div className="trending-head"><div><span>Discover</span><h2 id="trending-title">Trending on Base</h2><p>Tokens with notable DEX activity right now. Trending does not mean recommended.</p></div><span className="trending-source">DexScreener · ~2 min refresh</span></div>{loading?<div className="trending-skeleton" aria-label="Loading trending Base tokens">{Array.from({length:5}).map((_,i)=><i key={i}/>)}</div>:<div className="trending-list"><div className="trending-labels" aria-hidden="true"><span>Token</span><span>Price</span><span>24h</span><span>Volume</span><span>Liquidity</span><span/></div>{tokens.map((token,index)=><button className="trending-row" key={token.address} onClick={()=>router.push(`/analyze/${token.address}`)} aria-label={`Analyze ${token.name}`}><span className="trend-token"><b className="trend-rank">{index+1}</b>{token.image?<Image src={token.image} alt="" width={30} height={30} unoptimized/>:<i>{token.symbol.slice(0,1)}</i>}<span><strong>{token.symbol}</strong><small>{token.name}</small></span></span><span className="trend-number">{money(token.priceUsd,false)}</span><span className={`trend-number ${token.change24h!=null&&token.change24h>=0?"positive":"negative"}`}>{token.change24h==null?"—":`${token.change24h>0?"+":""}${token.change24h.toFixed(1)}%`}</span><span className="trend-number">{money(token.volume24h)}</span><span className="trend-number">{money(token.liquidity)}</span><span className="trend-analyze">Analyze <b>→</b></span></button>)}</div>}<p className="trending-note">Ranked from recently discovered Base tokens using volume, liquidity and transaction activity. Always inspect the evidence before making a decision.</p></section>}
