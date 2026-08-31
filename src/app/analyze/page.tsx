@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { AnalyzeStartClient } from "@/components/AnalyzeStartClient";
 import { TrendingBase } from "@/components/TrendingBase";
 
-export const metadata:Metadata={title:"Analyze a Base token",description:"Paste a Base token contract and investigate market activity, liquidity, holders, contract risk and available social evidence."};
+export const metadata:Metadata={title:"Analyze a Base token",description:"Paste a Base token contract and investigate market activity, liquidity, holders, contract risk and available social evidence.",alternates:{canonical:"/analyze"}};
 
 export default function AnalyzeStartPage() {
   return (
