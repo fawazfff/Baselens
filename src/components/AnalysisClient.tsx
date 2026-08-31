@@ -1,244 +1,78 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import type { FullAnalysis } from "@/lib/types";
 import { fmtMoney } from "@/lib/utils";
 
-const show = (value: unknown, suffix = "") =>
-  value === null || value === undefined
-    ? "Unavailable"
-    : `${typeof value === "number" ? value.toLocaleString(undefined, { maximumFractionDigits: 2 }) : value}${suffix}`;
-
+const show = (value: unknown, suffix = "") => value === null || value === undefined ? "Unavailable" : `${typeof value === "number" ? value.toLocaleString(undefined, { maximumFractionDigits: 2 }) : value}${suffix}`;
 const shortAddress = (value: string) => `${value.slice(0, 6)}...${value.slice(-4)}`;
 
 export function AnalysisClient({ contract }: { contract: string }) {
   const [result, setResult] = useState<FullAnalysis | null>(null);
   const [error, setError] = useState("");
   const [stage, setStage] = useState(0);
+  const [question, setQuestion] = useState("");
+  const [answer, setAnswer] = useState("");
+  const [asking, setAsking] = useState(false);
 
-  const stages = [
-    "Checking contract",
-    "Finding market data",
-    "Inspecting liquidity",
-    "Checking holders",
-    "Running security checks",
-    "Agent interpreting evidence",
-  ];
+  const stages = ["Observe · validate Base contract", "Analyze · collect market evidence", "Analyze · inspect liquidity & holders", "Reason · run security checks", "Decide · calculate signal scores", "Explain · agent interprets evidence"];
 
   useEffect(() => {
     const timer = setInterval(() => setStage((current) => Math.min(current + 1, stages.length - 1)), 760);
-
-    fetch("/api/analyze", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ contract }),
-    })
-      .then(async (response) => {
-        const json = await response.json();
-        if (!response.ok) throw new Error(json.error || "Analysis failed");
-        setResult(json);
-      })
-      .catch((reason) => setError(reason.message))
-      .finally(() => clearInterval(timer));
-
+    fetch("/api/analyze", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ contract }) })
+      .then(async (response) => { const json = await response.json(); if (!response.ok) throw new Error(json.error || "Analysis failed"); setResult(json); })
+      .catch((reason) => setError(reason.message)).finally(() => clearInterval(timer));
     return () => clearInterval(timer);
   }, [contract]);
 
-  if (error) {
-    return (
-      <main className="shell analysis-error-page">
-        <div className="analysis-error-card">
-          <span>Analysis stopped</span>
-          <h1>We could not inspect that contract.</h1>
-          <p>{error}</p>
-          <Link className="btn blue link" href="/">Try another contract</Link>
-        </div>
-      </main>
-    );
+  async function askAgent(prompt?: string) {
+    if (!result) return;
+    const q = (prompt || question).trim();
+    if (!q) return;
+    setQuestion(q); setAsking(true); setAnswer("");
+    const evidence = { token: result.data.token, market: result.data.market, liquidity: result.data.liquidity, trading: result.data.trading, holders: result.data.holders, security: result.data.security, socials: result.data.socials, scores: result.data.scores, confidence: result.data.confidence, sources: result.data.sources, verdict: result.agent };
+    try {
+      const response = await fetch("/api/ask", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ question: q, evidence }) });
+      const json = await response.json();
+      setAnswer(response.ok ? json.answer : json.error || "The agent could not answer right now.");
+    } catch { setAnswer("The agent could not answer right now."); }
+    finally { setAsking(false); }
   }
 
-  if (!result) {
-    return (
-      <main className="analysis-loading">
-        <div className="shell analysis-loading-inner">
-          <div className="analysis-loader-mark"><i /></div>
-          <span className="loading-kicker">BaseLens research agent</span>
-          <h1>{stages[stage]}</h1>
-          <div className="loading-track">
-            {stages.map((item, index) => (
-              <div key={item} className={index <= stage ? "done" : ""}>
-                <i />
-                <span>{item}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </main>
-    );
-  }
+  if (error) return <main className="shell analysis-error-page"><div className="analysis-error-card"><span>Analysis stopped</span><h1>We could not inspect that contract.</h1><p>{error}</p><Link className="btn blue link" href="/analyze">Try another contract</Link></div></main>;
+  if (!result) return <main className="analysis-loading"><div className="shell analysis-loading-inner"><div className="analysis-loader-mark"><i /></div><span className="loading-kicker">BaseLens research agent</span><h1>{stages[stage]}</h1><div className="loading-track">{stages.map((item, index) => <div key={item} className={index <= stage ? "done" : ""}><i /><span>{item}</span></div>)}</div></div></main>;
 
   const { data, agent, agentError } = result;
-  const scoreRows = [
-    ["Market", data.scores.marketHealth],
-    ["Liquidity", data.scores.liquidityHealth],
-    ["Activity", data.scores.tradingActivity],
-    ["Holders", data.scores.holderHealth],
-    ["Safety", data.scores.contractSafety],
-    ["Social", data.scores.socialPresence],
-    ["Momentum", data.scores.momentum],
-  ] as const;
+  const scoreRows = [["Market", data.scores.marketHealth], ["Liquidity", data.scores.liquidityHealth], ["Activity", data.scores.tradingActivity], ["Holders", data.scores.holderHealth], ["Safety", data.scores.contractSafety], ["Social", data.scores.socialPresence], ["Momentum", data.scores.momentum]] as const;
+  const metrics = [["Price", fmtMoney(data.market.priceUsd)], ["Market cap", fmtMoney(data.market.marketCap)], ["Liquidity", fmtMoney(data.liquidity.usd)], ["24h volume", fmtMoney(data.trading.volume24h)], ["24h change", show(data.trading.change24h, "%")]];
+  const securityChecks = [["Contract verified", data.security.verified], ["Honeypot detected", data.security.honeypot === null ? null : !data.security.honeypot], ["Can buy", data.security.cannotBuy === null ? null : !data.security.cannotBuy], ["Can sell", data.security.cannotSellAll === null ? null : !data.security.cannotSellAll], ["Ownership renounced", data.security.renouncedOwnership]] as const;
+  const socialLinks = [["Website", data.socials.website], ["X", data.socials.x], ["Telegram", data.socials.telegram], ["Farcaster", data.socials.farcaster]].filter(([, url]) => Boolean(url)) as string[][];
+  const evidenceSignals = [...(agent?.positiveSignals || []).map((text) => ["Positive", text]), ...(agent?.riskSignals || []).map((text) => ["Risk", text]), ...(agent?.unusualObservations || []).map((text) => ["Observe", text])].slice(0, 8);
 
-  const metrics = [
-    ["Price", fmtMoney(data.market.priceUsd)],
-    ["Market cap", fmtMoney(data.market.marketCap)],
-    ["Liquidity", fmtMoney(data.liquidity.usd)],
-    ["24h volume", fmtMoney(data.trading.volume24h)],
-    ["24h change", show(data.trading.change24h, "%")],
-  ];
+  return <main className="analysis-app"><div className="shell analysis-app-shell">
+    <div className="analysis-toolbar"><Link href="/analyze" className="analysis-back">← New analysis</Link><div className="analysis-toolbar-center"><span>AI analysis</span><span>On-chain data</span><span>Security</span><span>Social</span></div><Link href="/compare" className="analysis-compare">Compare tokens</Link></div>
+    <section className="analysis-token-header"><div className="analysis-token-identity"><div className="analysis-token-logo">{data.token.logo ? <img src={data.token.logo} alt="" /> : <span>{data.token.symbol?.slice(0,1) || "B"}</span>}</div><div><span className="analysis-overline">Token overview · Base mainnet</span><h1>{data.token.name || "Unknown token"} <small>{data.token.symbol ? `$${data.token.symbol}` : ""}</small></h1><code>{data.contract}</code></div></div><div className="analysis-score-block"><span>BaseLens score</span><div><strong>{data.scores.overall}</strong><small>/100</small></div><em>{agent?.verdict || "Unavailable"}</em></div></section>
+    <section className="analysis-metric-row">{metrics.map(([label,value]) => <div key={label}><span>{label}</span><b>{value}</b></div>)}</section>
 
-  const securityChecks = [
-    ["Contract verified", data.security.verified],
-    ["Honeypot detected", data.security.honeypot === null ? null : !data.security.honeypot],
-    ["Can buy", data.security.cannotBuy === null ? null : !data.security.cannotBuy],
-    ["Can sell", data.security.cannotSellAll === null ? null : !data.security.cannotSellAll],
-    ["Ownership renounced", data.security.renouncedOwnership],
-  ] as const;
+    <div className="analysis-grid"><div className="analysis-main-column">
+      <section className="research-card agent-verdict-card"><header><div><span className="analysis-overline">Agent verdict</span><h2>{agent?.summary || "Agent analysis temporarily unavailable"}</h2></div><span className="confidence-badge">{data.confidence.level} confidence</span></header><p>{agent?.scoreInterpretation || agentError || "The deterministic research result is still available below."}</p><div className="verdict-pair"><div><span>Strongest signal</span><b>{agent?.strongestPositiveSignal || "Available market evidence"}</b></div><div><span>Biggest risk</span><b>{agent?.biggestRisk || data.security.warnings[0] || "Insufficient risk data"}</b></div></div></section>
 
-  return (
-    <main className="analysis-app">
-      <div className="shell analysis-app-shell">
-        <div className="analysis-toolbar">
-          <Link href="/" className="analysis-back">← New analysis</Link>
-          <div className="analysis-toolbar-center">
-            <span>AI analysis</span><span>On-chain data</span><span>Security</span><span>Liquidity</span>
-          </div>
-          <Link href="/compare" className="analysis-compare">Compare</Link>
-        </div>
+      <section className="research-card ask-agent-card"><header><div><span className="analysis-overline">Ask BaseLens</span><h3>Interrogate this research</h3></div><span className="evidence-only-pill">Evidence only</span></header><p>Ask about the collected evidence. The agent will say when the data cannot support an answer.</p><div className="ask-suggestions"><button onClick={() => askAgent("What is the biggest risk in this token profile?")}>Biggest risk</button><button onClick={() => askAgent("Why did holder health get this score?")}>Holder score</button><button onClick={() => askAgent("What evidence is missing or uncertain?")}>Missing evidence</button></div><div className="ask-input-row"><input value={question} onChange={(e) => setQuestion(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") askAgent(); }} placeholder="Ask about this token's evidence..." /><button disabled={asking} onClick={() => askAgent()}>{asking ? "Thinking…" : "Ask"}</button></div>{answer && <div className="agent-answer"><span>BaseLens</span><p>{answer}</p></div>}</section>
 
-        <section className="analysis-token-header">
-          <div className="analysis-token-identity">
-            <div className="analysis-token-logo">
-              {data.token.logo ? <img src={data.token.logo} alt="" /> : <span>{data.token.symbol?.slice(0, 1) || "B"}</span>}
-            </div>
-            <div>
-              <span className="analysis-overline">Token overview · Base</span>
-              <h1>{data.token.name || "Unknown token"} <small>{data.token.symbol ? `$${data.token.symbol}` : ""}</small></h1>
-              <code>{data.contract}</code>
-            </div>
-          </div>
-          <div className="analysis-score-block">
-            <span>Agent score</span>
-            <div><strong>{data.scores.overall}</strong><small>/100</small></div>
-            <em>{agent?.verdict || "Unavailable"}</em>
-          </div>
-        </section>
+      <div className="analysis-two-col"><section className="research-card security-card"><header><div><span className="analysis-overline">Security scan</span><h3>{data.security.level === "low" ? "No critical issue detected" : `${data.security.level} risk profile`}</h3></div></header><div className="security-check-list">{securityChecks.map(([label,state]) => <div key={label} className={state === false ? "risk" : state === null ? "unknown" : "ok"}><i>{state === false ? "!" : state === null ? "?" : "✓"}</i><span>{label}</span><b>{state === null ? "Unavailable" : state ? "Pass" : "Flag"}</b></div>)}</div>{(data.security.buyTaxPercent !== null || data.security.sellTaxPercent !== null) && <div className="tax-row"><span>Buy tax <b>{show(data.security.buyTaxPercent,"%")}</b></span><span>Sell tax <b>{show(data.security.sellTaxPercent,"%")}</b></span></div>}{data.security.warnings.length > 0 && <div className="warning-stack">{data.security.warnings.slice(0,4).map((warning) => <span key={warning}>{warning}</span>)}</div>}</section>
+      <section className="research-card liquidity-card"><header><div><span className="analysis-overline">Liquidity health</span><h3>{data.scores.liquidityHealth}/100</h3></div></header><div className="liquidity-gauge"><div style={{ "--score": `${data.scores.liquidityHealth * 3.6}deg` } as CSSProperties}><span>{data.scores.liquidityHealth}%</span></div></div><dl><div><dt>Liquidity</dt><dd>{fmtMoney(data.liquidity.usd)}</dd></div><div><dt>Liquidity / market cap</dt><dd>{data.liquidity.toMarketCapRatio === null ? "Unavailable" : `${(data.liquidity.toMarketCapRatio*100).toFixed(1)}%`}</dd></div></dl></section></div>
 
-        <section className="analysis-metric-row">
-          {metrics.map(([label, value]) => (
-            <div key={label}><span>{label}</span><b>{value}</b></div>
-          ))}
-        </section>
+      <section className="research-card evidence-card"><header><div><span className="analysis-overline">Why the agent thinks this</span><h3>Evidence, not hidden reasoning</h3></div></header>{evidenceSignals.length ? <div className="evidence-list">{evidenceSignals.map(([kind,text],index) => <div key={`${kind}-${index}`} className={kind.toLowerCase()}><span>{kind}</span><p>{text}</p></div>)}</div> : <p className="empty-copy">No additional agent evidence was returned. The deterministic checks remain visible throughout the page.</p>}{agent?.investigateFurther?.length ? <div className="investigate-next"><span>Investigate next</span>{agent.investigateFurther.slice(0,3).map((item) => <p key={item}>→ {item}</p>)}</div> : null}</section>
 
-        <div className="analysis-grid">
-          <div className="analysis-main-column">
-            <section className="research-card agent-verdict-card">
-              <header><div><span className="analysis-overline">Agent verdict</span><h2>{agent?.summary || "Agent analysis temporarily unavailable"}</h2></div><span className="confidence-badge">{data.confidence.level} confidence</span></header>
-              <p>{agent?.scoreInterpretation || agentError || "The deterministic research result is still available below."}</p>
-              <div className="verdict-pair">
-                <div><span>Strongest signal</span><b>{agent?.strongestPositiveSignal || "Available market evidence"}</b></div>
-                <div><span>Biggest risk</span><b>{agent?.biggestRisk || data.security.warnings[0] || "Insufficient risk data"}</b></div>
-              </div>
-            </section>
+      <section className="research-card signal-table-card"><header><div><span className="analysis-overline">Trading activity</span><h3>Market flow by window</h3></div></header><div className="signal-table-wrap"><table className="signal-table"><thead><tr><th>Window</th><th>Volume</th><th>Change</th><th>Buys</th><th>Sells</th></tr></thead><tbody><tr><td>1 hour</td><td>{fmtMoney(data.trading.volume1h)}</td><td>{show(data.trading.change1h,"%")}</td><td>{show(data.trading.buys1h)}</td><td>{show(data.trading.sells1h)}</td></tr><tr><td>6 hours</td><td>{fmtMoney(data.trading.volume6h)}</td><td>{show(data.trading.change6h,"%")}</td><td>{show(data.trading.buys6h)}</td><td>{show(data.trading.sells6h)}</td></tr><tr><td>24 hours</td><td>{fmtMoney(data.trading.volume24h)}</td><td>{show(data.trading.change24h,"%")}</td><td>{show(data.trading.buys24h)}</td><td>{show(data.trading.sells24h)}</td></tr></tbody></table></div></section>
+      <section className="research-card holder-card"><header><div><span className="analysis-overline">Holder distribution</span><h3>{show(data.holders.count)} holders</h3></div><span>Top 10: {show(data.holders.top10Percent,"%")}</span></header>{data.holders.top.length ? <div className="holder-list">{data.holders.top.slice(0,5).map((holder,index) => <div key={`${holder.address}-${index}`}><span>#{index+1}</span><code>{shortAddress(holder.address)}</code><b>{holder.percent.toFixed(2)}%</b></div>)}</div> : <p className="empty-copy">Holder-level data is unavailable for this token.</p>}</section>
+    </div>
 
-            <div className="analysis-two-col">
-              <section className="research-card security-card">
-                <header><div><span className="analysis-overline">Security scan</span><h3>{data.security.level === "low" ? "No critical issue detected" : `${data.security.level} risk profile`}</h3></div></header>
-                <div className="security-check-list">
-                  {securityChecks.map(([label, state]) => (
-                    <div key={label} className={state === false ? "risk" : state === null ? "unknown" : "ok"}>
-                      <i>{state === false ? "!" : state === null ? "?" : "✓"}</i><span>{label}</span><b>{state === null ? "Unavailable" : state ? "Pass" : "Flag"}</b>
-                    </div>
-                  ))}
-                </div>
-                {(data.security.buyTaxPercent !== null || data.security.sellTaxPercent !== null) && (
-                  <div className="tax-row"><span>Buy tax <b>{show(data.security.buyTaxPercent, "%")}</b></span><span>Sell tax <b>{show(data.security.sellTaxPercent, "%")}</b></span></div>
-                )}
-              </section>
-
-              <section className="research-card liquidity-card">
-                <header><div><span className="analysis-overline">Liquidity health</span><h3>{data.scores.liquidityHealth}/100</h3></div></header>
-                <div className="liquidity-gauge"><div style={{ "--score": `${data.scores.liquidityHealth * 3.6}deg` } as React.CSSProperties}><span>{data.scores.liquidityHealth}%</span></div></div>
-                <dl><div><dt>Liquidity</dt><dd>{fmtMoney(data.liquidity.usd)}</dd></div><div><dt>Liquidity / market cap</dt><dd>{data.liquidity.toMarketCapRatio === null ? "Unavailable" : `${(data.liquidity.toMarketCapRatio * 100).toFixed(1)}%`}</dd></div></dl>
-              </section>
-            </div>
-
-            <section className="research-card signal-table-card">
-              <header><div><span className="analysis-overline">Trading activity</span><h3>Market flow by window</h3></div></header>
-              <div className="signal-table-wrap">
-                <table className="signal-table">
-                  <thead><tr><th>Window</th><th>Volume</th><th>Change</th><th>Buys</th><th>Sells</th></tr></thead>
-                  <tbody>
-                    <tr><td>1 hour</td><td>{fmtMoney(data.trading.volume1h)}</td><td>{show(data.trading.change1h, "%")}</td><td>{show(data.trading.buys1h)}</td><td>{show(data.trading.sells1h)}</td></tr>
-                    <tr><td>6 hours</td><td>{fmtMoney(data.trading.volume6h)}</td><td>{show(data.trading.change6h, "%")}</td><td>{show(data.trading.buys6h)}</td><td>{show(data.trading.sells6h)}</td></tr>
-                    <tr><td>24 hours</td><td>{fmtMoney(data.trading.volume24h)}</td><td>{show(data.trading.change24h, "%")}</td><td>{show(data.trading.buys24h)}</td><td>{show(data.trading.sells24h)}</td></tr>
-                  </tbody>
-                </table>
-              </div>
-            </section>
-
-            <section className="research-card holder-card">
-              <header><div><span className="analysis-overline">Holder distribution</span><h3>{show(data.holders.count)} holders</h3></div><span>Top 10: {show(data.holders.top10Percent, "%")}</span></header>
-              {data.holders.top.length ? (
-                <div className="holder-list">
-                  {data.holders.top.slice(0, 5).map((holder, index) => (
-                    <div key={`${holder.address}-${index}`}><span>#{index + 1}</span><code>{shortAddress(holder.address)}</code><b>{holder.percent.toFixed(2)}%</b></div>
-                  ))}
-                </div>
-              ) : <p className="empty-copy">Holder-level data is unavailable for this token.</p>}
-            </section>
-          </div>
-
-          <aside className="analysis-side-column">
-            <section className="research-card scorecard-card">
-              <header><span className="analysis-overline">Signal score</span></header>
-              {scoreRows.map(([label, score]) => (
-                <div className="app-score-row" key={label}>
-                  <div><span>{label}</span><b>{score}</b></div>
-                  <div><i style={{ width: `${score}%` }} /></div>
-                </div>
-              ))}
-            </section>
-
-            <section className="research-card confidence-card-real">
-              <span className="analysis-overline">Confidence</span>
-              <strong>{data.confidence.score}%</strong>
-              <b>{data.confidence.level}</b>
-              <p>{agent?.confidenceExplanation || `Missing domains: ${data.confidence.missingDomains.join(", ") || "none"}.`}</p>
-            </section>
-
-            <section className="research-card source-card">
-              <header><span className="analysis-overline">Data sources</span></header>
-              {data.sources.map((source) => (
-                <div className="app-source-row" key={source.name}>
-                  <i className={source.ok ? "live" : "missing"} />
-                  <div><b>{source.name}</b><span>{source.note || (source.ok ? "Evidence collected" : "Unavailable")}</span></div>
-                </div>
-              ))}
-            </section>
-
-            <section className="research-card quick-facts-card">
-              <header><span className="analysis-overline">Research details</span></header>
-              <dl>
-                <div><dt>DEX</dt><dd>{data.market.dex || "Unavailable"}</dd></div>
-                <div><dt>Pair age</dt><dd>{data.token.ageHours === null ? "Unavailable" : `${(data.token.ageHours / 24).toFixed(1)} days`}</dd></div>
-                <div><dt>Top holder</dt><dd>{show(data.holders.topHolderPercent, "%")}</dd></div>
-                <div><dt>Buy / sell</dt><dd>{show(data.trading.buySellRatio24h)}</dd></div>
-              </dl>
-            </section>
-          </aside>
-        </div>
-      </div>
-    </main>
-  );
+    <aside className="analysis-side-column"><section className="research-card scorecard-card"><header><span className="analysis-overline">Signal score</span></header>{scoreRows.map(([label,score]) => <div className="app-score-row" key={label}><div><span>{label}</span><b>{score}</b></div><div><i style={{width:`${score}%`}} /></div></div>)}</section>
+    <section className="research-card confidence-card-real"><span className="analysis-overline">Evidence confidence</span><strong>{data.confidence.score}%</strong><b>{data.confidence.level}</b><p>{agent?.confidenceExplanation || `Missing domains: ${data.confidence.missingDomains.join(", ") || "none"}.`}</p></section>
+    <section className="research-card source-card"><header><span className="analysis-overline">Evidence provenance</span></header>{data.sources.map((source) => <div className="app-source-row" key={source.name}><i className={source.ok ? "live" : "missing"}/><div><b>{source.name}</b><span>{source.note || (source.ok ? "Evidence collected" : "Unavailable")}</span></div></div>)}<small className="source-timestamp">Analysis generated {new Date().toLocaleString()}</small></section>
+    {socialLinks.length > 0 && <section className="research-card social-card"><header><span className="analysis-overline">Official links</span></header>{socialLinks.map(([label,url]) => <a key={label} href={url} target="_blank" rel="noreferrer"><span>{label}</span><b>Open ↗</b></a>)}</section>}
+    <section className="research-card quick-facts-card"><header><span className="analysis-overline">Research details</span></header><dl><div><dt>DEX</dt><dd>{data.market.dex || "Unavailable"}</dd></div><div><dt>FDV</dt><dd>{fmtMoney(data.market.fdv)}</dd></div><div><dt>Pair</dt><dd>{data.market.pairAddress ? shortAddress(data.market.pairAddress) : "Unavailable"}</dd></div><div><dt>Pair age</dt><dd>{data.token.ageHours === null ? "Unavailable" : `${(data.token.ageHours/24).toFixed(1)} days`}</dd></div><div><dt>Top holder</dt><dd>{show(data.holders.topHolderPercent,"%")}</dd></div><div><dt>Buy / sell</dt><dd>{show(data.trading.buySellRatio24h)}</dd></div></dl></section></aside></div>
+  </div></main>;
 }
