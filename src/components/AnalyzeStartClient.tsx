@@ -9,7 +9,6 @@ const MODULES = [
   ["market", "Market & Liquidity", "Price, market cap, liquidity, volume, momentum and trading flow."],
   ["holders", "Holder Analysis", "Holder count, top-wallet concentration and distribution risk."],
   ["security", "Security Scan", "Contract restrictions, taxes, ownership and honeypot signals."],
-  ["social", "Social & X", "Official links and available public social evidence. No invented sentiment."],
 ] as const;
 
 export function AnalyzeStartClient() {
@@ -31,7 +30,7 @@ export function AnalyzeStartClient() {
 
   return <div className="research-launcher">
     <div className="mode-switch" role="tablist" aria-label="Research mode"><button className={mode === "single" ? "active" : ""} onClick={() => setMode("single")}>Analyze one token</button><button className={mode === "compare" ? "active" : ""} onClick={() => setMode("compare")}>Compare tokens</button></div>
-    <div className="launcher-copy"><span>Choose your research</span><h1>{mode === "single" ? "What should BaseLens investigate?" : "Compare Base tokens through the same research pipeline."}</h1><p>{mode === "single" ? "Paste one Base contract, choose the evidence you care about, and let the agent research it." : "Compare 2 to 5 contracts across the same market, holder, security and social evidence."}</p></div>
+    <div className="launcher-copy"><span>Choose your research</span><h1>{mode === "single" ? "What should BaseLens investigate?" : "Compare Base tokens through the same research pipeline."}</h1><p>{mode === "single" ? "Paste one Base contract, choose the evidence you care about, and let the agent research it." : "Compare 2 to 5 contracts across the same market, liquidity, holder and contract-security evidence."}</p></div>
     {mode === "single" && <div className="launcher-contract"><label htmlFor="launcher-contract">Base token contract</label><input id="launcher-contract" value={contract} onChange={(e) => { setContract(e.target.value); setError(""); }} placeholder="0x..." spellCheck={false} autoComplete="off" aria-invalid={Boolean(error)}/></div>}
     <div className="module-grid">{MODULES.map(([id,title,description])=>{const checked=selected.includes(id);return <button type="button" key={id} className={`module-option ${checked ? "selected" : ""}`} aria-pressed={checked} onClick={()=>toggle(id)}><span className="module-check" aria-hidden="true">{checked ? "✓" : ""}</span><div><b>{title}</b><p>{description}</p></div></button>})}</div>
     <div className="launcher-actions"><button className="select-all" onClick={()=>setSelected(allSelected ? [] : MODULES.map(([id])=>id))}>{allSelected ? "Clear all" : "Select all"}</button><span className="module-count">{selected.length} of {MODULES.length} checks selected</span><button className="btn blue launcher-primary" onClick={start}>{mode === "single" ? "Start research" : "Open comparison"} <span>→</span></button></div>{error&&<div className="launcher-error" role="alert">{error}</div>}
