@@ -1,1 +1,12 @@
-export async function getVerificationData(address:string){if(!process.env.ETHERSCAN_API_KEY)return null;const qs=new URLSearchParams({chainid:"8453",module:"contract",action:"getsourcecode",address,apikey:process.env.ETHERSCAN_API_KEY});const r=await fetch(`https://api.etherscan.io/v2/api?${qs}`,{next:{revalidate:3600},signal:AbortSignal.timeout(8000)});if(!r.ok)throw new Error(`Etherscan returned ${r.status}`);const j=await r.json(),x=Array.isArray(j?.result)?j.result[0]:null;if(!x||typeof x!=="object")return null;return{verified:String(x.SourceCode||"").length>0,proxy:x.Proxy==="1",implementation:x.Implementation||null,contractName:x.ContractName||null}}
+import { getChain } from "@/lib/chains";
+
+export async function getVerificationData(address:string,chainInput?:string|number|null){
+  if(!process.env.ETHERSCAN_API_KEY)return null;
+  const chain=getChain(chainInput);
+  const qs=new URLSearchParams({chainid:String(chain.id),module:"contract",action:"getsourcecode",address,apikey:process.env.ETHERSCAN_API_KEY});
+  const r=await fetch(`https://api.etherscan.io/v2/api?${qs}`,{next:{revalidate:3600},signal:AbortSignal.timeout(8000)});
+  if(!r.ok)throw new Error(`Etherscan returned ${r.status}`);
+  const j=await r.json(),x=Array.isArray(j?.result)?j.result[0]:null;
+  if(!x||typeof x!=="object")return null;
+  return{verified:String(x.SourceCode||"").length>0,proxy:x.Proxy==="1",implementation:x.Implementation||null,contractName:x.ContractName||null};
+}
